@@ -29,13 +29,16 @@ export default function Navbar() {
     <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'glass-panel py-3' : 'bg-transparent py-5'}`}>
       <div className="container mx-auto px-4 lg:px-8 flex justify-between items-center">
         {/* Logo */}
-        <Link href="/" className="flex flex-col z-50 relative shrink-0">
-          <span className="text-xl lg:text-2xl font-black tracking-wider gold-text-gradient font-[var(--font-cinematic)]">
-            REVATHY CINEMAX
-          </span>
-          <span className="text-[0.6rem] lg:text-xs text-red-500 font-bold tracking-[0.2em] uppercase">
-            RGB Real Laser
-          </span>
+        <Link href="/" className="flex items-center gap-3 z-50 relative shrink-0">
+          <img src="/logo.png" alt="Revathy Cinemax Logo" className="w-10 h-10 lg:w-14 lg:h-14 object-contain" />
+          <div className="flex flex-col">
+            <span className="text-xl lg:text-2xl font-black tracking-wider gold-text-gradient font-[var(--font-cinematic)]">
+              REVATHY CINEMAX
+            </span>
+            <span className="text-[0.6rem] lg:text-xs text-red-500 font-bold tracking-[0.2em] uppercase">
+              RGB Real Laser
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Nav */}

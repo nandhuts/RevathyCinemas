@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   description: 'Experience premium cinema in Kollam. RGB Real Laser, Dolby Atmos, and smart seat food delivery at Revathy Cinemax Parippally.',
   keywords: 'Revathy Cinemax, Parippally, Kollam, cinema, movies, tickets, BookMyShow, snacks delivery',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export const viewport = {

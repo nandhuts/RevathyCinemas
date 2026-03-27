@@ -12,13 +12,16 @@ export default function Footer() {
 
       <div className="container mx-auto px-4 md:px-8 relative z-10 grid grid-cols-1 md:grid-cols-4 gap-12">
         <div className="col-span-1 md:col-span-1">
-          <Link href="/" className="flex flex-col mb-6">
-            <span className="text-xl md:text-2xl font-black tracking-wider gold-text-gradient font-[var(--font-cinematic)]">
-              REVATHY CINEMAX
-            </span>
-            <span className="text-xs text-red-500 font-bold tracking-[0.2em] uppercase">
-              RGB Real Laser
-            </span>
+          <Link href="/" className="flex items-center gap-3 mb-6">
+            <img src="/logo.png" alt="Revathy Cinemax Logo" className="w-12 h-12 lg:w-16 lg:h-16 object-contain" />
+            <div className="flex flex-col">
+              <span className="text-xl md:text-2xl font-black tracking-wider gold-text-gradient font-[var(--font-cinematic)]">
+                REVATHY CINEMAX
+              </span>
+              <span className="text-xs text-red-500 font-bold tracking-[0.2em] uppercase">
+                RGB Real Laser
+              </span>
+            </div>
           </Link>
           <p className="text-sm leading-relaxed mb-6">
             Experience the magic of cinema with cutting-edge RGB Real Laser projection and Dolby Atmos sound in Karippally, Kollam.
