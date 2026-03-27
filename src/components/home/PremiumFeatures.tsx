@@ -21,8 +21,8 @@ const FEATURES = [
   },
   {
     icon: <Popcorn size={40} className="text-[var(--premium-gold)]" />,
-    title: 'Seat-to-Seat Dining',
-    description: 'Skip the interval queues! Order freshly prepared snacks and beverages directly from your phone to your seat using our smart order system.'
+    title: 'Smart Quick Ordering',
+    description: 'Skip the interval queues! Order freshly prepared snacks and beverages directly from your phone and collect them quickly from the counter.'
   }
 ];
 

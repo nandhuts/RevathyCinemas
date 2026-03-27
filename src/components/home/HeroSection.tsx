@@ -65,7 +65,7 @@ export default function HeroSection() {
             & DOLBY ATMOS
           </h1>
           <p className="text-gray-300 text-lg md:text-xl mb-10 max-w-2xl font-light">
-            Step into the future of cinema. Enjoy crystal-clear 4K projection, earth-shattering sound, and our revolutionary smart-seat food delivery system.
+            Step into the future of cinema. Enjoy crystal-clear 4K projection, earth-shattering sound, and our revolutionary smart snack ordering system.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-5 justify-center md:justify-start">
@@ -84,7 +84,7 @@ export default function HeroSection() {
               className="group relative px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-[var(--premium-gold)]/50 text-[var(--premium-gold)] font-bold rounded-full transition-all flex items-center justify-center gap-3 hover:-translate-y-1 shadow-[0_0_15px_rgba(207,168,94,0.15)]"
             >
               <Popcorn className="relative z-10" />
-              <span className="relative z-10 uppercase tracking-wider">Order Snacks to Seat</span>
+              <span className="relative z-10 uppercase tracking-wider">Order Snacks Now</span>
             </Link>
 
             <button className="flex items-center justify-center gap-2 px-6 py-4 text-white hover:text-[var(--premium-gold)] transition-colors group">

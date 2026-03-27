@@ -28,21 +28,21 @@ export default async function Home() {
                 Don't Miss <br /> A <span className="gold-text-gradient">Single Frame</span>
               </h2>
               <p className="text-gray-400 mb-8 max-w-lg leading-relaxed">
-                Experience seamless food ordering right from your seat. No standing in lines during the interval. Order fresh popcorn, snacks, and beverages with a simple scan.
+                Order snacks quickly during movie interval. Easy payment using UPI. Collect from counter without waiting in long queue.
               </p>
               
               <ul className="space-y-4 mb-8">
                 <li className="flex items-center gap-3 text-sm text-gray-300">
                   <span className="w-5 h-5 rounded-full bg-[var(--premium-gold)]/20 flex items-center justify-center text-[var(--premium-gold)] font-bold text-xs">1</span>
-                  Scan the QR code on your seat armrest
-                </li>
-                <li className="flex items-center gap-3 text-sm text-gray-300">
-                  <span className="w-5 h-5 rounded-full bg-[var(--premium-gold)]/20 flex items-center justify-center text-[var(--premium-gold)] font-bold text-xs">2</span>
                   Browse our premium digital menu
                 </li>
                 <li className="flex items-center gap-3 text-sm text-gray-300">
+                  <span className="w-5 h-5 rounded-full bg-[var(--premium-gold)]/20 flex items-center justify-center text-[var(--premium-gold)] font-bold text-xs">2</span>
+                  Pay easily using UPI
+                </li>
+                <li className="flex items-center gap-3 text-sm text-gray-300">
                   <span className="w-5 h-5 rounded-full bg-[var(--premium-gold)]/20 flex items-center justify-center text-[var(--premium-gold)] font-bold text-xs">3</span>
-                  Enjoy quick delivery to your exact seat
+                  Collect quickly from the counter
                 </li>
               </ul>
               
@@ -57,7 +57,7 @@ export default async function Home() {
                 <div className="h-full w-full bg-black rounded-xl border border-white/5 p-4 flex flex-col">
                   {/* Mock App UI */}
                   <div className="flex justify-between items-center mb-6 mt-4">
-                    <span className="text-[10px] font-bold text-[var(--premium-gold)] tracking-widest uppercase">Seat G14</span>
+                    <span className="text-[10px] font-bold text-[var(--premium-gold)] tracking-widest uppercase">Audi-1</span>
                     <span className="text-[10px] font-bold text-white bg-red-600 px-2 py-0.5 rounded">LIVE SHOW</span>
                   </div>
                   <h3 className="text-lg font-black font-[var(--font-cinematic)] text-white mb-2 uppercase">Menu</h3>

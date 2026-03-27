@@ -1,5 +1,8 @@
-import { Globe, Share2, MapPin, Phone, MessageCircle } from 'lucide-react';
+import { Globe, Share2, MapPin, Phone, MessageCircle, Map } from 'lucide-react';
 import Link from 'next/link';
+
+const InstagramIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>);
+const FacebookIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>);
 
 export default function Footer() {
   return (
@@ -21,11 +24,17 @@ export default function Footer() {
             Experience the magic of cinema with cutting-edge RGB Real Laser projection and Dolby Atmos sound in Karippally, Kollam.
           </p>
           <div className="flex gap-4">
-            <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-[var(--premium-gold)]/20 hover:text-[var(--premium-gold)] transition-colors">
-              <Globe size={20} />
+            <a href="https://www.instagram.com/revathycinemax/" target="_blank" className="p-2 bg-white/5 rounded-full hover:bg-[var(--premium-gold)]/20 hover:text-[var(--premium-gold)] transition-colors">
+              <InstagramIcon />
             </a>
-            <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-[var(--premium-gold)]/20 hover:text-[var(--premium-gold)] transition-colors">
-              <Share2 size={20} />
+            <a href="https://www.facebook.com/revathyXsara/" target="_blank" className="p-2 bg-white/5 rounded-full hover:bg-[var(--premium-gold)]/20 hover:text-[var(--premium-gold)] transition-colors">
+              <FacebookIcon />
+            </a>
+            <a href="https://wa.me/91XXXXXXXXXX" target="_blank" className="p-2 bg-white/5 rounded-full hover:bg-green-500/20 hover:text-green-500 transition-colors">
+              <MessageCircle size={20} />
+            </a>
+            <a href="https://maps.google.com" target="_blank" className="p-2 bg-white/5 rounded-full hover:bg-red-500/20 hover:text-red-500 transition-colors">
+              <Map size={20} />
             </a>
           </div>
         </div>

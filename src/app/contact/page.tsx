@@ -12,7 +12,7 @@ export default function ContactPage() {
           Get in <span className="gold-text-gradient">Touch</span>
         </h1>
         <p className="text-gray-400 text-center max-w-2xl mx-auto mb-16 text-lg">
-          We'd love to hear from you. Whether you have questions about bookings, our smart food delivery system, or general inquiries.
+          We'd love to hear from you. Whether you have questions about bookings, our smart snack order system, or general inquiries.
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -50,7 +50,7 @@ export default function ContactPage() {
               <div>
                 <h3 className="text-2xl font-black font-[var(--font-cinematic)] uppercase text-white mb-2">WhatsApp</h3>
                 <p className="text-gray-400 leading-relaxed mb-4">
-                  Instant support for seat delivery and general queries.
+                  Instant support for snack orders and general queries.
                 </p>
                 <a
                   href="https://wa.me/919000000000"

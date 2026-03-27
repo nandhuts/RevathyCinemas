@@ -52,9 +52,9 @@ export default function Navbar() {
         <div className="hidden lg:flex gap-3 shrink-0">
           <Link href="/order" className="flex items-center gap-2 text-sm font-bold bg-white/10 hover:bg-white/20 px-4 py-2.5 rounded-full transition-colors border border-white/10 whitespace-nowrap">
             <Popcorn size={16} className="text-[var(--premium-gold)]" />
-            <span className="text-white">Order Seat</span>
+            <span className="text-white">Order Now</span>
           </Link>
-          <a href="https://in.bookmyshow.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-bold bg-[var(--premium-red)] hover:bg-red-700 px-4 py-2.5 rounded-full transition-colors shadow-[0_0_15px_rgba(139,0,0,0.5)] whitespace-nowrap">
+          <a href="https://in.bookmyshow.com/cinemas/kolm/revathy-cinemax-rgb-real-laser-parippally/buytickets/RYCP/20260327" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-bold bg-[var(--premium-red)] hover:bg-red-700 px-4 py-2.5 rounded-full transition-colors shadow-[0_0_15px_rgba(139,0,0,0.5)] whitespace-nowrap">
             <Ticket size={16} />
             <span className="text-white">Book Tickets</span>
           </a>

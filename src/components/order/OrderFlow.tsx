@@ -1,34 +1,22 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { QrCode, Search, CheckCircle2, ChevronRight, X, Clock, Users, ArrowRight, Smartphone, Ticket } from 'lucide-react';
-
-// Mock Data
-const MENU_ITEMS = [
-  { id: 1, name: 'Cinemax Classic Popcorn', type: 'Popcorn', price: 180, img: 'https://images.unsplash.com/photo-1585647347384-2593bc35786b?auto=format&fit=crop&q=80&w=200', desc: 'Butter salted large popcorn' },
-  { id: 2, name: 'Premium Caramel Popcorn', type: 'Popcorn', price: 220, img: 'https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?auto=format&fit=crop&q=80&w=200', desc: 'Handcrafted golden caramel' },
-  { id: 3, name: 'Cheese Nachos Deluxe', type: 'Nachos', price: 250, img: 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?auto=format&fit=crop&q=80&w=200', desc: 'Jalapenos and extra liquid cheese' },
-  { id: 4, name: 'Crispy Chicken Burger', type: 'Burger', price: 190, img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=200', desc: 'Spicy chicken patty with mayo' },
-  { id: 5, name: 'Coca Cola Large', type: 'Beverage', price: 120, img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&q=80&w=200', desc: 'Chilled 500ml' },
-  { id: 6, name: 'Blockbuster Combo', type: 'Combo', price: 450, img: 'https://images.unsplash.com/photo-1621252179027-94459d278660?auto=format&fit=crop&q=80&w=200', desc: '1 Large Popcorn + 2 Coke + Nachos' },
-];
+import { QrCode, CheckCircle2, ChevronRight, Smartphone, Ticket, QrCode as QrCodeIcon, ArrowRight } from 'lucide-react';
+import { useAppStore } from '@/lib/store';
 
 export default function OrderFlow() {
-  const searchParams = useSearchParams();
-  const initialSeat = searchParams.get('seat') || '';
-  
-  const [step, setStep] = useState(initialSeat ? 2 : 1);
-  const [seatNum, setSeatNum] = useState(initialSeat);
-  const [audi, setAudi] = useState('Audi 1 (RGB Laser)');
+  const { menu, orders, updateOrders } = useAppStore();
+  const [step, setStep] = useState(1);
+  const [screen, setScreen] = useState('');
   const [cart, setCart] = useState<{item: any, qty: number}[]>([]);
-  const [customer, setCustomer] = useState({ phone: '', bookingId: '', payment: 'upi' });
+  const [customer, setCustomer] = useState({ phone: '', payment: 'upi' });
   const [activeCategory, setActiveCategory] = useState('All');
+  const [generatedOrder, setGeneratedOrder] = useState<any>(null);
 
   const categories = ['All', 'Popcorn', 'Nachos', 'Burger', 'Beverage', 'Combo'];
-
-  const filteredMenu = activeCategory === 'All' ? MENU_ITEMS : MENU_ITEMS.filter(m => m.type === activeCategory);
+  const activeMenu = menu.filter((m: any) => m.enabled !== false);
+  const filteredMenu = activeCategory === 'All' ? activeMenu : activeMenu.filter((m: any) => m.type === activeCategory);
 
   const cartTotal = cart.reduce((acc, curr) => acc + (curr.item.price * curr.qty), 0);
 
@@ -47,8 +35,18 @@ export default function OrderFlow() {
   };
 
   const placeOrder = () => {
-    setStep(4);
-    // In real app: call API here
+    const orderId = `RC${Math.floor(100 + Math.random() * 900)}`;
+    const newOrder = {
+      id: orderId,
+      time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+      audi: screen,
+      items: cart.map(c => ({ name: c.item.name, qty: c.qty })),
+      status: 'New Order',
+      phone: customer.phone,
+    };
+    updateOrders([newOrder, ...orders]);
+    setGeneratedOrder(newOrder);
+    setStep(5);
   };
 
   return (
@@ -56,7 +54,7 @@ export default function OrderFlow() {
       {/* Step Indicator */}
       <div className="flex items-center justify-between mb-8 relative">
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-white/10 -z-10 rounded-full"></div>
-        {[1, 2, 3, 4].map((s) => (
+        {[1, 2, 3, 4, 5].map((s) => (
           <div key={s} className="flex flex-col items-center gap-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${step >= s ? 'bg-[var(--premium-gold)] text-black shadow-[0_0_15px_rgba(207,168,94,0.5)]' : 'bg-black border border-white/20 text-gray-500'}`}>
               {step > s ? <CheckCircle2 size={16} /> : s}
@@ -67,54 +65,9 @@ export default function OrderFlow() {
 
       <AnimatePresence mode="wait">
         {step === 1 && (
-          <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="glass-panel p-6 md:p-8 rounded-2xl">
-            <h2 className="text-2xl font-black font-[var(--font-cinematic)] uppercase tracking-wider mb-2 text-white text-center">Seat Selection</h2>
-            <p className="text-gray-400 text-sm text-center mb-8">Scan QR on your armrest or enter manually</p>
-            
-            <button className="w-full py-6 md:py-8 border-2 border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center gap-4 hover:border-[var(--premium-gold)]/50 transition-colors group mb-6">
-              <div className="p-4 bg-white/5 rounded-full group-hover:bg-[var(--premium-gold)]/10 transition-colors text-white group-hover:text-[var(--premium-gold)]">
-                <QrCode size={40} />
-              </div>
-              <span className="font-bold uppercase tracking-wider text-sm group-hover:text-[var(--premium-gold)]">Scan QR Code</span>
-            </button>
-            
-            <div className="flex items-center gap-4 mb-6">
-              <div className="flex-1 h-px bg-white/10"></div>
-              <span className="text-xs text-gray-500 uppercase font-bold tracking-widest">OR</span>
-              <div className="flex-1 h-px bg-white/10"></div>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs uppercase tracking-widest text-gray-400 font-bold mb-2 block">Enter Seat Number</label>
-                <input 
-                  type="text" 
-                  placeholder="e.g. G14" 
-                  value={seatNum}
-                  onChange={(e) => setSeatNum(e.target.value.toUpperCase())}
-                  className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-4 text-white uppercase text-xl font-bold tracking-widest focus:outline-none focus:border-[var(--premium-gold)] transition-colors text-center"
-                />
-              </div>
-              
-              <button 
-                onClick={() => setStep(2)}
-                disabled={!seatNum}
-                className="w-full py-4 bg-[var(--premium-gold)] disabled:bg-white/5 text-black disabled:text-gray-500 font-bold uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 transition-all mt-6 shadow-[0_0_20px_rgba(207,168,94,0.3)] disabled:shadow-none"
-              >
-                Continue to Menu <ArrowRight size={18} />
-              </button>
-            </div>
-          </motion.div>
-        )}
-
-        {step === 2 && (
-          <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6">
+          <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6">
             <div className="glass-panel p-4 rounded-xl flex justify-between items-center sticky top-20 z-20">
-              <div className="flex flex-col">
-                <span className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Delivering to</span>
-                <span className="text-xl font-black text-[var(--premium-gold)] uppercase tracking-wider">{seatNum} • {audi}</span>
-              </div>
-              <button onClick={() => setStep(1)} className="text-xs text-white/60 hover:text-white underline uppercase">Change Seat</button>
+              <h2 className="text-xl font-black font-[var(--font-cinematic)] uppercase tracking-wider text-white">Snack Menu</h2>
             </div>
 
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide py-2">
@@ -130,7 +83,7 @@ export default function OrderFlow() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-24">
-              {filteredMenu.map(item => (
+              {filteredMenu.map((item: any) => (
                 <div key={item.id} className="glass-panel p-3 rounded-xl flex gap-4">
                   <div className="w-24 h-24 rounded-lg bg-cover bg-center shrink-0" style={{ backgroundImage: `url(${item.img})` }}></div>
                   <div className="flex flex-col justify-between flex-1 py-1">
@@ -138,13 +91,13 @@ export default function OrderFlow() {
                       <h3 className="text-sm font-bold text-white leading-tight mb-1">{item.name}</h3>
                       <p className="text-xs text-gray-400 line-clamp-2">{item.desc}</p>
                     </div>
-                    <div className="flex justify-between items-end">
+                    <div className="flex justify-between items-end mt-2">
                       <span className="text-lg font-black text-[var(--premium-gold)]">₹{item.price}</span>
                       <button 
                         onClick={() => addToCart(item)}
-                        className="w-8 h-8 rounded-full bg-white/10 hover:bg-[var(--premium-gold)] hover:text-black flex items-center justify-center transition-colors text-white"
+                        className="w-auto px-4 h-8 rounded-full bg-[var(--premium-gold)] text-black font-bold text-xs flex items-center justify-center shadow-[0_0_10px_rgba(207,168,94,0.3)] hover:scale-105 transition-transform"
                       >
-                        +
+                        Add
                       </button>
                     </div>
                   </div>
@@ -162,10 +115,10 @@ export default function OrderFlow() {
                       <span className="text-xl font-black text-[var(--premium-gold)]">₹{cartTotal}</span>
                     </div>
                     <button 
-                      onClick={() => setStep(3)}
+                      onClick={() => setStep(2)}
                       className="px-6 py-3 bg-[var(--premium-gold)] text-black font-bold uppercase tracking-widest text-sm rounded-lg flex items-center gap-2 hover:bg-white transition-colors"
                     >
-                      Checkout <ChevronRight size={16} />
+                      Next <ChevronRight size={16} />
                     </button>
                   </div>
                 </div>
@@ -174,74 +127,117 @@ export default function OrderFlow() {
           </motion.div>
         )}
 
+        {step === 2 && (
+          <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="glass-panel p-6 md:p-8 rounded-2xl">
+            <div className="flex items-center gap-4 mb-8 border-b border-white/10 pb-4">
+              <button onClick={() => setStep(1)} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/20"><ChevronRight className="rotate-180" size={16} /></button>
+              <h2 className="text-2xl font-black font-[var(--font-cinematic)] uppercase tracking-wider text-white">Select Screen</h2>
+            </div>
+
+            <div className="grid gap-4 mb-8">
+              {['Audi-1', 'Audi-2', 'Audi-3'].map((audi) => (
+                <button
+                  key={audi}
+                  onClick={() => setScreen(audi)}
+                  className={`w-full py-6 rounded-xl flex items-center justify-center text-xl font-bold uppercase tracking-widest transition-colors ${screen === audi ? 'bg-[var(--premium-gold)] text-black shadow-[0_0_20px_rgba(207,168,94,0.4)]' : 'bg-black/50 border border-white/10 text-white hover:border-[var(--premium-gold)]/50'}`}
+                >
+                  {audi}
+                </button>
+              ))}
+            </div>
+            
+            <button 
+                onClick={() => setStep(3)}
+                disabled={!screen}
+                className="w-full py-4 bg-[var(--premium-gold)] disabled:bg-white/5 text-black disabled:text-gray-500 font-bold uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 transition-all mt-6 shadow-[0_0_20px_rgba(207,168,94,0.3)] disabled:shadow-none"
+              >
+                Continue <ArrowRight size={18} />
+              </button>
+          </motion.div>
+        )}
+
         {step === 3 && (
           <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="glass-panel p-6 md:p-8 rounded-2xl">
             <div className="flex items-center gap-4 mb-8 border-b border-white/10 pb-4">
               <button onClick={() => setStep(2)} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/20"><ChevronRight className="rotate-180" size={16} /></button>
-              <h2 className="text-2xl font-black font-[var(--font-cinematic)] uppercase tracking-wider text-white">Checkout</h2>
+              <h2 className="text-2xl font-black font-[var(--font-cinematic)] uppercase tracking-wider text-white">Order Details</h2>
             </div>
 
             <div className="space-y-6 mb-8">
               <div>
                 <label className="text-xs uppercase tracking-widest text-gray-400 font-bold mb-2 block flex items-center gap-2">
-                  <Smartphone size={14} /> Phone Number (For WhatsApp Updates)
+                  <Smartphone size={14} /> Mobile Number
                 </label>
                 <input 
                   type="tel" 
                   value={customer.phone}
-                  onChange={(e) => setCustomer({...customer, phone: e.target.value})}
+                  onChange={(e) => setCustomer({...customer, phone: e.target.value.replace(/\D/g,'').slice(0, 10)})}
                   placeholder="Enter 10-digit number"
                   className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--premium-gold)] transition-colors"
                 />
-              </div>
-
-              <div>
-                <label className="text-xs uppercase tracking-widest text-gray-400 font-bold mb-2 block flex items-center gap-2">
-                  <Ticket size={14} /> Booking ID (Optional for fast delivery)
-                </label>
-                <input 
-                  type="text" 
-                  value={customer.bookingId}
-                  onChange={(e) => setCustomer({...customer, bookingId: e.target.value})}
-                  placeholder="e.g. BMS123XXXX"
-                  className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--premium-gold)] transition-colors font-mono uppercase text-sm"
-                />
+                {customer.phone.length > 0 && customer.phone.length < 10 && <p className="text-red-500 text-xs mt-1">Please enter a valid 10-digit number</p>}
               </div>
 
               <div className="border border-white/10 rounded-xl p-4 bg-white/5">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-white mb-4">Payment Method</h3>
-                <div className="space-y-3">
-                  {['UPI', 'Card', 'Cash on Delivery'].map((method) => (
-                    <label key={method} className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${customer.payment === method.toLowerCase() ? 'border-[var(--premium-gold)] bg-[var(--premium-gold)]/10' : 'border-white/10 hover:border-white/30 bg-black/50'}`}>
-                      <span className="text-sm font-bold text-white">{method}</span>
-                      <input 
-                        type="radio" 
-                        name="payment" 
-                        className="hidden" 
-                        checked={customer.payment === method.toLowerCase()}
-                        onChange={() => setCustomer({...customer, payment: method.toLowerCase()})}
-                      />
-                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${customer.payment === method.toLowerCase() ? 'border-[var(--premium-gold)]' : 'border-white/30'}`}>
-                        {customer.payment === method.toLowerCase() && <div className="w-2 h-2 rounded-full bg-[var(--premium-gold)]"></div>}
-                      </div>
-                    </label>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-[var(--premium-gold)] mb-4">Order Summary</h3>
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-gray-400 text-sm">Screen</span>
+                  <span className="text-white font-bold">{screen}</span>
+                </div>
+                <div className="mb-3 border-b border-white/10 pb-3">
+                  {cart.map((c, i) => (
+                    <div key={i} className="flex justify-between items-center text-sm mb-2">
+                      <span className="text-gray-300">{c.qty}x {c.item.name}</span>
+                      <span className="text-white">₹{c.item.price * c.qty}</span>
+                    </div>
                   ))}
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-white font-black text-lg">Total</span>
+                  <span className="text-[var(--premium-gold)] font-black text-xl">₹{cartTotal}</span>
                 </div>
               </div>
             </div>
 
             <button 
-              onClick={placeOrder}
-              disabled={cart.length === 0 || !customer.phone}
+              onClick={() => setStep(4)}
+              disabled={customer.phone.length !== 10}
               className="w-full py-4 bg-[var(--premium-gold)] text-black font-bold uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(207,168,94,0.4)] disabled:opacity-50 disabled:shadow-none transition-all"
             >
-              Pay ₹{cartTotal} & Place Order
+              Proceed to Payment
             </button>
           </motion.div>
         )}
 
         {step === 4 && (
-          <motion.div key="step4" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center text-center py-12 glass-panel rounded-3xl relative overflow-hidden">
+          <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="glass-panel p-6 md:p-8 rounded-2xl text-center">
+            <div className="flex items-center gap-4 mb-6 border-b border-white/10 pb-4">
+              <button onClick={() => setStep(3)} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/20"><ChevronRight className="rotate-180" size={16} /></button>
+              <h2 className="text-2xl font-black font-[var(--font-cinematic)] uppercase tracking-wider text-white">UPI Payment</h2>
+            </div>
+            
+            <p className="text-gray-400 mb-6 text-sm">Scan the QR code below using any UPI app</p>
+
+            <div className="bg-white p-4 rounded-2xl w-64 h-64 mx-auto mb-8 flex items-center justify-center shadow-lg shadow-white/5">
+                <QrCodeIcon size={200} className="text-black" />
+            </div>
+
+            <div className="flex justify-between items-center border border-white/10 bg-black/50 rounded-xl p-4 mb-8 max-w-sm mx-auto">
+                <span className="text-gray-300 font-bold uppercase tracking-wider text-sm">Amount to Pay</span>
+                <span className="text-[var(--premium-gold)] font-black text-2xl">₹{cartTotal}</span>
+            </div>
+
+            <button 
+              onClick={placeOrder}
+              className="w-full max-w-sm mx-auto py-4 bg-green-600 hover:bg-green-500 text-white font-bold uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all"
+            >
+              <CheckCircle2 size={18} /> Payment Completed
+            </button>
+          </motion.div>
+        )}
+
+        {step === 5 && (
+          <motion.div key="step5" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center text-center py-12 glass-panel rounded-3xl relative overflow-hidden">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-green-500/20 rounded-full blur-[100px] pointer-events-none"></div>
             
             <motion.div 
@@ -253,24 +249,14 @@ export default function OrderFlow() {
               <CheckCircle2 size={48} />
             </motion.div>
             
-            <h2 className="text-4xl font-black font-[var(--font-cinematic)] uppercase tracking-wider text-white mb-2">Order Received!</h2>
-            <p className="text-[var(--premium-gold)] font-bold tracking-widest text-lg mb-6 uppercase">Order #RCX{Math.floor(1000 + Math.random() * 9000)}</p>
+            <h2 className="text-3xl font-black font-[var(--font-cinematic)] uppercase tracking-wider text-white mb-2">Order placed successfully!</h2>
+            <p className="text-[var(--premium-gold)] font-black tracking-widest text-4xl mb-6 uppercase border border-[var(--premium-gold)]/30 bg-[var(--premium-gold)]/10 px-6 py-3 rounded-2xl shadow-lg">{generatedOrder?.id}</p>
             
-            <div className="bg-black/50 border border-white/10 rounded-xl p-6 mb-8 w-full max-w-sm flex justify-between items-center text-left">
-              <div>
-                <span className="text-xs text-gray-500 block uppercase font-bold mb-1">Delivering to</span>
-                <span className="text-2xl font-black text-white">{seatNum}</span>
-              </div>
-              <div className="h-10 w-px bg-white/20"></div>
-              <div className="text-right">
-                <span className="text-xs text-gray-500 block uppercase font-bold mb-1">Est. Time</span>
-                <span className="text-xl font-bold text-green-400">5-8 Mins</span>
-              </div>
+            <div className="bg-black/50 border border-white/10 rounded-xl p-6 mb-8 w-full max-w-sm flex flex-col justify-center items-center text-center">
+              <span className="text-gray-500 block uppercase font-bold mb-2">Instructions</span>
+              <span className="text-xl font-bold text-white uppercase tracking-wider text-red-400">Collect from snack counter</span>
+              <span className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-2">({screen})</span>
             </div>
-
-            <p className="text-sm text-gray-400 leading-relaxed max-w-xs mb-8">
-              We'll send order updates to your WhatsApp number. Relax and enjoy the movie!
-            </p>
 
             <button onClick={() => window.location.href='/'} className="px-8 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-full font-bold uppercase tracking-widest text-sm transition-colors">
               Return to Home
