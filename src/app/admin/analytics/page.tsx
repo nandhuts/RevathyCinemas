@@ -1,13 +1,53 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { BarChart3, TrendingUp, Users, Clock, Popcorn } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function AnalyticsDashboard() {
+  const [orders, setOrders] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const { data } = await supabase.from('orders').select('*');
+      if (data) setOrders(data);
+    };
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Compute dynamic stats
+  const totalOrders = orders.length;
+
+  let itemCounts: Record<string, number> = {};
+  orders.forEach(o => {
+    (o.items || []).forEach((item: any) => {
+      itemCounts[item.name] = (itemCounts[item.name] || 0) + item.qty;
+    });
+  });
+  let mostOrdered = "None";
+  let maxCount = 0;
+  for (const [name, count] of Object.entries(itemCounts)) {
+    if (count > maxCount) { maxCount = count as number; mostOrdered = name; }
+  }
+
+  const screens = new Set(orders.map(o => o.screen));
+  
+  const hours = new Array(24).fill(0);
+  orders.forEach(o => {
+    const d = new Date(o.created_at);
+    hours[d.getHours()]++;
+  });
+  const maxHourVal = Math.max(...hours, 1);
+  const peakHour = hours.indexOf(Math.max(...hours, -1));
+  const peakOrders = hours[peakHour] || 0;
+
   const KPIS = [
-    { title: "Total Orders Today", value: "842", icon: <TrendingUp className="text-[var(--premium-gold)]" size={32} />, trend: "+12%" },
-    { title: "Most Ordered Snack", value: "Classic Popcorn", icon: <Popcorn className="text-[var(--premium-gold)]" size={32} />, sub: "312 Units" },
-    { title: "Active Shows", value: "3", icon: <Users className="text-[var(--premium-gold)]" size={32} />, sub: "Audi 1, 2, 4" },
-    { title: "Peak Interval Orders", value: "245", icon: <Clock className="text-[var(--premium-gold)]" size={32} />, sub: "At 14:15" },
+    { title: "Total Orders Today", value: totalOrders.toString(), icon: <TrendingUp className="text-[var(--premium-gold)]" size={32} />, trend: "Live Data" },
+    { title: "Most Ordered Snack", value: mostOrdered, icon: <Popcorn className="text-[var(--premium-gold)]" size={32} />, sub: `${maxCount} Units` },
+    { title: "Active Shows", value: screens.size.toString(), icon: <Users className="text-[var(--premium-gold)]" size={32} />, sub: Array.from(screens).join(', ') || "No active screens" },
+    { title: "Peak Interval Orders", value: peakOrders.toString(), icon: <Clock className="text-[var(--premium-gold)]" size={32} />, sub: `At ${peakHour.toString().padStart(2, '0')}:00` },
   ];
 
   return (
@@ -54,21 +94,26 @@ export default function AnalyticsDashboard() {
               </select>
             </div>
             
-            {/* Mock Chart Visualization */}
+            {/* Real Chart Visualization */}
             <div className="h-48 flex items-end justify-between gap-2 mt-auto">
-              {[40, 20, 80, 100, 60, 40, 90, 70, 30, 80, 50, 20].map((h, i) => (
-                <div key={i} className="w-full bg-white/5 hover:bg-[var(--premium-gold)]/80 transition-colors rounded-t-sm relative group flex flex-col justify-end" style={{ height: `${h}%` }}>
-                  <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] text-white opacity-0 group-hover:opacity-100 font-mono transition-opacity">{h}0</span>
-                </div>
-              ))}
+              {[9, 11, 13, 15, 17, 19, 21, 23].map((h, i) => {
+                const heightPercentage = (hours[h] / maxHourVal) * 100 || 5; // give min 5% to show bar structure
+                return (
+                  <div key={i} className="w-full bg-white/5 hover:bg-[var(--premium-gold)]/80 transition-colors rounded-t-sm relative group flex flex-col justify-end" style={{ height: `${heightPercentage}%` }}>
+                    <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] text-white opacity-0 group-hover:opacity-100 font-mono transition-opacity">{hours[h]}</span>
+                  </div>
+                );
+              })}
             </div>
-            <div className="flex justify-between mt-4 text-[10px] uppercase font-bold text-gray-500 tracking-widest border-t border-white/10 pt-4">
+            <div className="flex justify-between mt-4 text-[10px] uppercase font-bold text-gray-500 tracking-widest border-t border-white/10 pt-4 px-2">
               <span>9 AM</span>
-              <span>12 PM</span>
+              <span>11 AM</span>
+              <span>1 PM</span>
               <span>3 PM</span>
-              <span>6 PM</span>
+              <span>5 PM</span>
+              <span>7 PM</span>
               <span>9 PM</span>
-              <span>12 AM</span>
+              <span>11 PM</span>
             </div>
           </div>
 

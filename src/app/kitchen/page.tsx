@@ -2,29 +2,54 @@
 
 import { useState, useEffect } from 'react';
 import { RefreshCw, Clock, Flame, CheckCircle } from 'lucide-react';
-import { useAppStore } from '@/lib/store';
+import { supabase } from '@/lib/supabase';
 
 export default function KitchenDashboard() {
-  const { orders, updateOrders } = useAppStore();
+  const [orders, setOrders] = useState<any[]>([]);
   const [currentTime, setCurrentTime] = useState('');
 
-  // Only show orders that need action
-  const activeOrders = orders.filter((o:any) => o.status.toLowerCase() === 'new order' || o.status.toLowerCase() === 'preparing');
+  const fetchOrders = async () => {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (!error && data) {
+      const formatted = data.map((d: any) => ({
+        id: d.order_number,
+        audi: d.screen,
+        time: new Date(d.created_at).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+        items: d.items,
+        status: d.order_status,
+      }));
+      setOrders(formatted);
+    }
+  };
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    fetchOrders();
+    const orderInterval = setInterval(fetchOrders, 3000);
+    const clockInterval = setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     }, 1000);
-    return () => clearInterval(timer);
+    
+    return () => {
+        clearInterval(orderInterval);
+        clearInterval(clockInterval);
+    };
   }, []);
 
-  const setPreparing = (id: string) => {
-    updateOrders(orders.map((o:any) => o.id === id ? { ...o, status: 'Preparing' } : o));
+  const setPreparing = async (id: string) => {
+    await supabase.from('orders').update({ order_status: 'Preparing' }).eq('order_number', id);
+    fetchOrders();
   };
 
-  const setReady = (id: string) => {
-    updateOrders(orders.map((o:any) => o.id === id ? { ...o, status: 'Ready for Pickup' } : o));
+  const setReady = async (id: string) => {
+    await supabase.from('orders').update({ order_status: 'Ready' }).eq('order_number', id);
+    fetchOrders();
   };
+
+  const activeOrders = orders.filter((o:any) => o.status.toLowerCase() === 'new' || o.status.toLowerCase() === 'preparing');
 
   return (
     <div className="min-h-screen bg-[#050505] text-white p-4 md:p-8 font-sans">
@@ -43,16 +68,16 @@ export default function KitchenDashboard() {
         {activeOrders.map((order: any) => (
           <div 
             key={order.id} 
-            className={`rounded-2xl border-2 flex flex-col h-full bg-[#111] shadow-2xl transition-all ${order.status.toLowerCase() === 'new order' ? 'border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]' : 'border-orange-500/50'}`}
+            className={`rounded-2xl border-2 flex flex-col h-full bg-[#111] shadow-2xl transition-all ${order.status.toLowerCase() === 'new' ? 'border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]' : 'border-orange-500/50'}`}
           >
-            <div className={`p-4 flex justify-between items-center border-b-2 ${order.status.toLowerCase() === 'new order' ? 'bg-red-500/20 border-red-500/30' : 'bg-white/5 border-white/10'}`}>
+            <div className={`p-4 flex justify-between items-center border-b-2 ${order.status.toLowerCase() === 'new' ? 'bg-red-500/20 border-red-500/30' : 'bg-white/5 border-white/10'}`}>
               <div className="flex flex-col">
                 <span className="text-4xl font-black uppercase">{order.id}</span>
                 <span className="text-xs font-bold text-gray-400 tracking-widest">{order.audi}</span>
               </div>
               <div className="flex flex-col items-end">
                 <span className="flex items-center gap-2 text-xl font-bold bg-black/50 px-3 py-1 rounded-lg font-mono">
-                  <Clock size={20} className={order.status.toLowerCase() === 'new order' ? 'text-red-500' : 'text-[var(--premium-gold)]'} /> {order.time}
+                  <Clock size={20} className={order.status.toLowerCase() === 'new' ? 'text-red-500' : 'text-[var(--premium-gold)]'} /> {order.time}
                 </span>
               </div>
             </div>
@@ -73,7 +98,7 @@ export default function KitchenDashboard() {
             </div>
 
             <div className="p-4 border-t-2 border-white/10 mt-auto">
-              {order.status.toLowerCase() === 'new order' ? (
+              {order.status.toLowerCase() === 'new' ? (
                   <button 
                   onClick={() => setPreparing(order.id)}
                   className="w-full py-6 bg-orange-600 hover:bg-orange-500 text-white text-2xl font-black uppercase tracking-widest rounded-xl transition-colors shadow-[0_0_20px_rgba(234,88,12,0.4)] flex items-center justify-center gap-3"

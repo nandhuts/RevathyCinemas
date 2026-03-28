@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QrCode, CheckCircle2, ChevronRight, Smartphone, Ticket, QrCode as QrCodeIcon, ArrowRight } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+import { supabase } from '@/lib/supabase';
 
 export default function OrderFlow() {
   const { menu, orders, updateOrders } = useAppStore();
@@ -13,6 +14,7 @@ export default function OrderFlow() {
   const [customer, setCustomer] = useState({ phone: '', payment: 'upi' });
   const [activeCategory, setActiveCategory] = useState('All');
   const [generatedOrder, setGeneratedOrder] = useState<any>(null);
+  const [isOrdering, setIsOrdering] = useState(false);
 
   const categories = ['All', 'Popcorn', 'Nachos', 'Burger', 'Beverage', 'Combo'];
   const activeMenu = menu.filter((m: any) => m.enabled !== false);
@@ -34,19 +36,44 @@ export default function OrderFlow() {
     setCart(prev => prev.filter(c => c.item.id !== id));
   };
 
-  const placeOrder = () => {
+  const placeOrder = async () => {
+    setIsOrdering(true);
     const orderId = `RC${Math.floor(100 + Math.random() * 900)}`;
-    const newOrder = {
-      id: orderId,
-      time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-      audi: screen,
-      items: cart.map(c => ({ name: c.item.name, qty: c.qty })),
-      status: 'New Order',
-      phone: customer.phone,
-    };
-    updateOrders([newOrder, ...orders]);
-    setGeneratedOrder(newOrder);
-    setStep(5);
+
+    const itemsJson = cart.map(c => ({ name: c.item.name, qty: c.qty }));
+    
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .insert([{
+          order_number: orderId,
+          items: itemsJson,
+          total_amount: cartTotal,
+          screen: screen,
+          phone_number: customer.phone,
+          payment_status: 'success',
+          order_status: 'New'
+        }]);
+
+      if (error) {
+        throw error;
+      }
+
+      const newOrderInfo = {
+        id: orderId,
+        time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+        audi: screen,
+        items: itemsJson,
+        status: 'New'
+      };
+      
+      setGeneratedOrder(newOrderInfo);
+      setStep(5);
+    } catch (err) {
+      alert("Unable to save order please try again.");
+    } finally {
+      setIsOrdering(false);
+    }
   };
 
   return (
@@ -229,9 +256,10 @@ export default function OrderFlow() {
 
             <button 
               onClick={placeOrder}
-              className="w-full max-w-sm mx-auto py-4 bg-green-600 hover:bg-green-500 text-white font-bold uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all"
+              disabled={isOrdering}
+              className="w-full max-w-sm mx-auto py-4 bg-green-600 hover:bg-green-500 text-white font-bold uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all disabled:opacity-50"
             >
-              <CheckCircle2 size={18} /> Payment Completed
+              <CheckCircle2 size={18} /> {isOrdering ? 'Processing...' : 'Payment Completed'}
             </button>
           </motion.div>
         )}

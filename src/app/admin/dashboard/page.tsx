@@ -3,9 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Filter, Search, CheckCircle, Clock, Flame, Image as ImageIcon, Plus, Trash2, Edit2, Play } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
-  const { orders, updateOrders, menu, updateMenu } = useAppStore();
+  const { menu, updateMenu } = useAppStore();
+  const [orders, setOrders] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' or 'menu'
   
   // Orders Tab State
@@ -32,11 +34,37 @@ export default function AdminDashboard() {
     } catch(e) {}
   };
 
+  const fetchOrders = async () => {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (!error && data) {
+      const formatted = data.map((d: any) => ({
+        id: d.order_number,
+        audi: d.screen,
+        time: new Date(d.created_at).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+        items: d.items,
+        status: d.order_status,
+        phone: d.phone_number
+      }));
+      
+      setOrders(formatted);
+    }
+  };
+
   useEffect(() => {
-    // Check for new orders
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 3000); // Polling for live orders
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    // Check for new orders to beep
     if (orders.length > lastOrderCount && lastOrderCount !== 0) {
       const newOrder = orders[0];
-      if (newOrder.status === 'New Order') {
+      if (newOrder?.status === 'New') {
           playBeep();
       }
     }
@@ -47,15 +75,16 @@ export default function AdminDashboard() {
     ? orders 
     : orders.filter((o:any) => o.status.toLowerCase() === activeFilter.toLowerCase());
 
-  const updateOrderStatus = (id: string, newStatus: string) => {
-    updateOrders(orders.map((o:any) => o.id === id ? { ...o, status: newStatus } : o));
+  const updateOrderStatus = async (id: string, newStatus: string) => {
+    await supabase.from('orders').update({ order_status: newStatus }).eq('order_number', id);
+    fetchOrders(); // Immediately refresh local state
   };
 
   const getStatusColor = (status: string) => {
     switch(status.toLowerCase()) {
-      case 'new order': return 'bg-red-500/10 text-red-500 border-red-500/20';
+      case 'new': return 'bg-red-500/10 text-red-500 border-red-500/20';
       case 'preparing': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
-      case 'ready for pickup': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+      case 'ready': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
       case 'completed': return 'bg-green-500/10 text-green-500 border-green-500/20';
       default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
     }
@@ -115,25 +144,26 @@ export default function AdminDashboard() {
         {activeTab === 'orders' ? (
           <>
             <div className="flex gap-4 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-              {['all', 'new order', 'preparing', 'ready for pickup', 'completed'].map((f) => (
+              {['all', 'new', 'preparing', 'ready', 'completed'].map((f) => (
                 <button
                   key={f}
                   onClick={() => setActiveFilter(f)}
                   className={`px-6 py-3 rounded-xl border font-bold uppercase tracking-widest text-xs transition-colors whitespace-nowrap
                     ${activeFilter === f ? 'bg-[var(--premium-gold)] text-black border-[var(--premium-gold)] shadow-[0_0_20px_rgba(207,168,94,0.3)]' : 'bg-transparent text-gray-400 border-white/10 hover:border-white/30'}`}
                 >
-                  {f}
+                  {f === 'all' ? 'All Orders' : f}
                 </button>
               ))}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredOrders.map((order: any) => (
-                <div key={order.id} className={`rounded-2xl border flex flex-col h-full bg-[#111] shadow-2xl transition-all ${order.status.toLowerCase() === 'new order' ? 'border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]' : 'border-white/10'}`}>
-                  <div className={`p-4 flex justify-between items-center border-b-2 ${order.status.toLowerCase() === 'new order' ? 'bg-red-500/20 border-red-500/30' : 'bg-white/5 border-white/10'}`}>
+                <div key={order.id} className={`rounded-2xl border flex flex-col h-full bg-[#111] shadow-2xl transition-all ${order.status.toLowerCase() === 'new' ? 'border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]' : 'border-white/10'}`}>
+                  <div className={`p-4 flex justify-between items-center border-b-2 ${order.status.toLowerCase() === 'new' ? 'bg-red-500/20 border-red-500/30' : 'bg-white/5 border-white/10'}`}>
                     <div className="flex flex-col">
                       <span className="text-2xl font-black uppercase text-white">{order.id}</span>
                       <span className="text-sm font-bold text-[var(--premium-gold)] tracking-widest">{order.audi}</span>
+                      <span className="text-xs text-gray-500">{order.phone}</span>
                     </div>
                     <div className="flex flex-col items-end">
                       <span className="flex items-center gap-1 text-sm font-bold bg-black/50 px-2 py-1 rounded text-white">
@@ -161,17 +191,17 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="p-4 border-t border-white/10 grid grid-cols-2 gap-2 mt-auto">
-                    {order.status.toLowerCase() === 'new order' && (
+                    {order.status.toLowerCase() === 'new' && (
                         <button onClick={() => updateOrderStatus(order.id, 'Preparing')} className="col-span-2 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold uppercase tracking-widest rounded-lg flex justify-center items-center gap-2">
                            <Flame size={16} /> Mark Preparing
                         </button>
                     )}
                     {order.status.toLowerCase() === 'preparing' && (
-                        <button onClick={() => updateOrderStatus(order.id, 'Ready for Pickup')} className="col-span-2 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-lg flex justify-center items-center gap-2">
+                        <button onClick={() => updateOrderStatus(order.id, 'Ready')} className="col-span-2 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-lg flex justify-center items-center gap-2">
                            Move to Ready
                         </button>
                     )}
-                    {order.status.toLowerCase() === 'ready for pickup' && (
+                    {order.status.toLowerCase() === 'ready' && (
                         <button onClick={() => updateOrderStatus(order.id, 'Completed')} className="col-span-2 py-3 bg-green-600 hover:bg-green-500 text-white font-bold uppercase tracking-widest rounded-lg flex justify-center items-center gap-2">
                            <CheckCircle size={16} /> Complete Order
                         </button>
