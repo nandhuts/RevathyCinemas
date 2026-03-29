@@ -1,10 +1,19 @@
+'use client';
+
 import { Globe, Share2, MapPin, Phone, MessageCircle, Map } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const InstagramIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>);
 const FacebookIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>);
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith('/counter')) {
+    return null;
+  }
+
   return (
     <footer className="bg-black text-gray-400 py-16 border-t border-white/10 relative overflow-hidden">
       {/* Background glow */}
@@ -24,7 +33,7 @@ export default function Footer() {
             </div>
           </Link>
           <p className="text-sm leading-relaxed mb-6">
-            Experience the magic of cinema with cutting-edge RGB Real Laser projection and Dolby Atmos sound in Karippally, Kollam.
+            Experience the magic of cinema with cutting-edge RGB Real Laser projection and Dolby Atmos sound in Parippally, Kollam.
           </p>
           <div className="flex gap-4">
             <a href="https://www.instagram.com/revathycinemax/" target="_blank" className="p-2 bg-white/5 rounded-full hover:bg-[var(--premium-gold)]/20 hover:text-[var(--premium-gold)] transition-colors">
@@ -33,7 +42,7 @@ export default function Footer() {
             <a href="https://www.facebook.com/revathyXsara/" target="_blank" className="p-2 bg-white/5 rounded-full hover:bg-[var(--premium-gold)]/20 hover:text-[var(--premium-gold)] transition-colors">
               <FacebookIcon />
             </a>
-            <a href="https://wa.me/91XXXXXXXXXX" target="_blank" className="p-2 bg-white/5 rounded-full hover:bg-green-500/20 hover:text-green-500 transition-colors">
+            <a href="https://wa.me/919746625026" target="_blank" className="p-2 bg-white/5 rounded-full hover:bg-green-500/20 hover:text-green-500 transition-colors">
               <MessageCircle size={20} />
             </a>
             <a href="https://maps.google.com" target="_blank" className="p-2 bg-white/5 rounded-full hover:bg-red-500/20 hover:text-red-500 transition-colors">
@@ -71,11 +80,11 @@ export default function Footer() {
             </li>
             <li className="flex items-center gap-3">
               <Phone size={20} className="text-[var(--premium-gold)] shrink-0" />
-              <span>+91 XXXXX XXXXX</span>
+              <span>+91 97466 25026</span>
             </li>
             <li className="flex items-center gap-3">
               <MessageCircle size={20} className="text-green-500 shrink-0" />
-              <a href="https://wa.me/91XXXXXXXXXX" className="hover:text-white transition-colors">WhatsApp Order Support</a>
+              <a href="https://wa.me/919746625026" className="hover:text-white transition-colors">WhatsApp Order Support</a>
             </li>
           </ul>
         </div>
@@ -83,7 +92,7 @@ export default function Footer() {
 
       <div className="container mx-auto px-4 md:px-8 mt-16 pt-8 border-t border-white/5 text-center text-xs">
         <p>&copy; {new Date().getFullYear()} Revathy Cinemax. All rights reserved.</p>
-        <p className="mt-2 text-gray-600">Smart Cinema Management System</p>
+        <p className="mt-2 text-gray-600">href="https://instagram.com/aaasta.h" Developed by Anandhu Digital Solutions</p>
       </div>
     </footer>
   );
