@@ -82,10 +82,10 @@ export default function AdminDashboard() {
 
   const getStatusColor = (status: string) => {
     switch(status.toLowerCase()) {
-      case 'new': return 'bg-red-500/10 text-red-500 border-red-500/20';
-      case 'preparing': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
-      case 'ready': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'completed': return 'bg-green-500/10 text-green-500 border-green-500/20';
+      case 'new': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.2)]';
+      case 'preparing': return 'bg-blue-500/10 text-blue-400 border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.2)]';
+      case 'ready': return 'bg-green-500/10 text-green-400 border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.2)]';
+      case 'completed': return 'bg-gray-800/30 text-gray-500 border-gray-800';
       default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
     }
   };
@@ -158,31 +158,43 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredOrders.map((order: any) => (
-                <div key={order.id} className={`rounded-2xl border flex flex-col h-full bg-[#111] shadow-2xl transition-all ${order.status.toLowerCase() === 'new' ? 'border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]' : 'border-white/10'}`}>
-                  <div className={`p-4 flex justify-between items-center border-b-2 ${order.status.toLowerCase() === 'new' ? 'bg-red-500/20 border-red-500/30' : 'bg-white/5 border-white/10'}`}>
+                <div key={order.id} className={`rounded-3xl border-2 flex flex-col h-full bg-[#0a0a0a] transition-all overflow-hidden
+                  ${order.status.toLowerCase() === 'new' ? 'border-yellow-500/50 shadow-[0_0_30px_rgba(234,179,8,0.15)] transform hover:scale-[1.02]' 
+                  : order.status.toLowerCase() === 'preparing' ? 'border-blue-500/50 shadow-[0_0_30px_rgba(59,130,246,0.1)]'
+                  : order.status.toLowerCase() === 'ready' ? 'border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.1)]'
+                  : 'border-white/5 opacity-60'}`}>
+                  
+                  {/* Card Header */}
+                  <div className={`p-5 flex justify-between items-start border-b border-white/10 
+                    ${order.status.toLowerCase() === 'new' ? 'bg-yellow-500/10' : 
+                      order.status.toLowerCase() === 'preparing' ? 'bg-blue-500/10' : 
+                      order.status.toLowerCase() === 'ready' ? 'bg-green-500/10' : 'bg-white/5'}`}>
                     <div className="flex flex-col">
-                      <span className="text-2xl font-black uppercase text-white">{order.id}</span>
-                      <span className="text-sm font-bold text-[var(--premium-gold)] tracking-widest">{order.audi}</span>
-                      <span className="text-xs text-gray-500">{order.phone}</span>
+                      <span className="text-4xl font-black uppercase text-white tracking-widest font-mono drop-shadow-md">{order.id}</span>
+                      <div className="flex items-center gap-3 mt-2">
+                        <span className="text-lg font-black text-white bg-black/40 px-3 py-1 rounded-lg border border-white/10">{order.audi}</span>
+                        <span className="text-sm font-bold text-gray-400 bg-black/20 px-2 py-1 rounded">{order.phone}</span>
+                      </div>
                     </div>
                     <div className="flex flex-col items-end">
-                      <span className="flex items-center gap-1 text-sm font-bold bg-black/50 px-2 py-1 rounded text-white">
-                        <Clock size={14} className="text-[var(--premium-gold)]" /> {order.time}
-                      </span>
-                      <span className={`text-xs font-black uppercase tracking-widest mt-2 px-2 py-1 rounded border ${getStatusColor(order.status)}`}>
+                      <span className={`text-sm font-black uppercase tracking-widest px-4 py-2 rounded-xl mb-2 border ${getStatusColor(order.status)}`}>
                         {order.status}
+                      </span>
+                      <span className="flex items-center gap-1 text-sm font-bold bg-black/50 px-3 py-1.5 rounded-lg text-gray-300">
+                        <Clock size={14} className="text-gray-400" /> {order.time}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex-1 p-5 overflow-y-auto">
-                    <ul className="space-y-3">
+                  {/* Items List */}
+                  <div className="flex-1 p-6 overflow-y-auto">
+                    <ul className="space-y-4">
                       {order.items.map((item: any, i: number) => (
-                        <li key={i} className="flex gap-3 items-center">
-                          <span className="w-8 h-8 bg-white/10 text-white text-sm font-black rounded flex items-center justify-center shrink-0">
+                        <li key={i} className="flex gap-4 items-center bg-white/5 p-3 rounded-2xl border border-white/5">
+                          <span className="w-12 h-12 bg-white/10 text-white text-xl font-black rounded-xl flex items-center justify-center shrink-0 shadow-inner">
                             {item.qty}x
                           </span>
-                          <span className="text-sm font-bold text-gray-200">
+                          <span className="text-xl font-bold text-gray-200">
                             {item.name}
                           </span>
                         </li>
@@ -190,27 +202,34 @@ export default function AdminDashboard() {
                     </ul>
                   </div>
 
-                  <div className="p-4 border-t border-white/10 grid grid-cols-2 gap-2 mt-auto">
-                    {order.status.toLowerCase() === 'new' && (
-                        <button onClick={() => updateOrderStatus(order.id, 'Preparing')} className="col-span-2 py-3 bg-orange-600 hover:bg-orange-500 text-white font-bold uppercase tracking-widest rounded-lg flex justify-center items-center gap-2">
-                           <Flame size={16} /> Mark Preparing
-                        </button>
-                    )}
-                    {order.status.toLowerCase() === 'preparing' && (
-                        <button onClick={() => updateOrderStatus(order.id, 'Ready')} className="col-span-2 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-lg flex justify-center items-center gap-2">
-                           Move to Ready
-                        </button>
-                    )}
-                    {order.status.toLowerCase() === 'ready' && (
-                        <button onClick={() => updateOrderStatus(order.id, 'Completed')} className="col-span-2 py-3 bg-green-600 hover:bg-green-500 text-white font-bold uppercase tracking-widest rounded-lg flex justify-center items-center gap-2">
-                           <CheckCircle size={16} /> Complete Order
-                        </button>
-                    )}
-                    {order.status.toLowerCase() === 'completed' && (
-                        <div className="col-span-2 py-3 text-center text-green-500 font-bold uppercase tracking-widest text-sm border border-green-500/20 rounded-lg bg-green-500/10">
-                            Order Completed
-                        </div>
-                    )}
+                  {/* Action Buttons */}
+                  <div className="p-4 border-t border-white/10 bg-[#111] grid grid-cols-2 md:grid-cols-4 gap-3 mt-auto">
+                    <button 
+                      onClick={() => updateOrderStatus(order.id, 'Preparing')} 
+                      disabled={order.status.toLowerCase() !== 'new'}
+                      className={`col-span-2 md:col-span-2 py-4 font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 text-sm
+                        ${order.status.toLowerCase() === 'new' ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
+                    >
+                      <Flame size={18} /> Preparing
+                    </button>
+                    
+                    <button 
+                      onClick={() => updateOrderStatus(order.id, 'Ready')} 
+                      disabled={order.status.toLowerCase() !== 'preparing'}
+                      className={`col-span-2 md:col-span-2 py-4 font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 text-sm
+                        ${order.status.toLowerCase() === 'preparing' ? 'bg-green-600 hover:bg-green-500 text-black shadow-[0_0_20px_rgba(34,197,94,0.4)]' : 'bg-gray-800 text-gray-500 cursor-not-allowed'}`}
+                    >
+                      <CheckCircle size={18} /> Ready
+                    </button>
+
+                    <button 
+                      onClick={() => updateOrderStatus(order.id, 'Completed')} 
+                      disabled={order.status.toLowerCase() !== 'ready'}
+                      className={`col-span-4 py-4 font-black uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 text-sm
+                        ${order.status.toLowerCase() === 'ready' ? 'bg-white hover:bg-gray-200 text-black shadow-lg' : 'bg-transparent border border-gray-800 text-gray-600'}`}
+                    >
+                      Mark Completed
+                    </button>
                   </div>
                 </div>
               ))}

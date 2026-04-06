@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #000000;
+  --background: #050505;
   --foreground: #ffffff;
-  --premium-gold: #cfa85e;
-  --premium-gold-glow: rgba(207, 168, 94, 0.4);
-  --premium-red: #8B0000;
-  --cinematic-glass: rgba(15, 15, 15, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --primary-accent: #00e5ff; /* Neon Blue */
+  --secondary-accent: #1e0b36; /* Deep Purple */
+  --primary-glow: rgba(0, 229, 255, 0.4);
+  --premium-red: #ff2a2a;
+  --cinematic-glass: rgba(20, 10, 40, 0.4);
+  --glass-border: rgba(0, 229, 255, 0.1);
   --font-sans: 'Inter', sans-serif;
   --font-cinematic: 'Orbitron', sans-serif;
 }
@@ -15,8 +16,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: var(--premium-gold);
-  --color-primary-glow: var(--premium-gold-glow);
+  --color-primary: var(--primary-accent);
+  --color-primary-glow: var(--primary-glow);
   --color-danger: var(--premium-red);
   --color-glass: var(--cinematic-glass);
   --color-glass-border: var(--glass-border);
@@ -35,32 +36,32 @@ body {
 /* Glassmorphism utilities */
 .glass-panel {
   background: var(--cinematic-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-.gold-text-gradient {
-  background: linear-gradient(to right, #eadd9a, #cfa85e, #9e7a35);
+.primary-text-gradient {
+  background: linear-gradient(to right, #ffffff, var(--primary-accent), #8a2be2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Custom scrollbar for cinematic feel */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #050505;
+  background: #02010a;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
+  background: #1e0b36;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #cfa85e;
+  background: var(--primary-accent);
 }
 
 /* Smooth page transitions */
@@ -72,4 +73,20 @@ body {
   opacity: 1;
   transform: translateY(0);
   transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+/* Animations */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.animate-bounce-subtle {
+  animation: bounce-subtle 0.5s ease-in-out;
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px var(--primary-glow); }
+  50% { box-shadow: 0 0 25px var(--primary-glow); }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
 }
